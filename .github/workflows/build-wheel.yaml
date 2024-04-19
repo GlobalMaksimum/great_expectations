@@ -21,6 +21,8 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: dist/great_expectations-*.whl
+          files: |
+            dist/great_expectations-*.whl
+            requirements.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

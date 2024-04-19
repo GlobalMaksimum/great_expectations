@@ -1,11 +1,11 @@
-name: Docker Image Build
+name: Build Wheel
 on:
   push:
     tags:
       - 'v*.*.*'
 
 jobs:
-  restful-services-release:
+  great-expectations-release:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: '3.10.9' 
       - name: install dependencies
-        run: pip install -r requierements.txt
+        run: pip install -r requirements.txt
       - name: Build python library
         run: python setup.py bdist_wheel
       - name: Release

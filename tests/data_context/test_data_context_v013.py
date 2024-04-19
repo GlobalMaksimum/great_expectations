@@ -520,7 +520,7 @@ def test_get_batch_with_query_in_runtime_parameters_using_runtime_data_connector
     execution_engine = batch.data.execution_engine
 
     assert (
-        execution_engine.execute_query(sa.text(selectable_count_sql_str)).scalar()
+        execution_engine.execute_query_scalar(sa.text(selectable_count_sql_str))
         == 123
     )
     assert batch.batch_markers.get("ge_load_time") is not None

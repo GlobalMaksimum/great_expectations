@@ -123,9 +123,9 @@ class ColumnValueCounts(ColumnAggregateMetricProvider):
                 query = query.order_by(sa.column(column))
         elif sort == "count":
             query = query.order_by(sa.column("count").desc())
-        results: List[sqlalchemy.Row] = execution_engine.execute_query(
+        results: List[sqlalchemy.Row] = execution_engine.execute_query_fetchall(
             query.select_from(selectable)
-        ).fetchall()
+        )
         # Numpy does not always infer the correct DataTypes for SqlAlchemy Row, so we cannot use vectorized approach.
         series = pd.Series(
             data=[row[1] for row in results],

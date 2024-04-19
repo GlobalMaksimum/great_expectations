@@ -42,7 +42,7 @@ class ColumnDistinctDates(ColumnAggregateMetricProvider):
         # get all unique dates from timestamp
         query = sa.select(sa.func.Date(column).distinct()).select_from(selectable)
         all_unique_dates = [
-            i[0] for i in execution_engine.execute_query(query).fetchall()
+            i[0] for i in execution_engine.execute_query_fetchall(query)
         ]
 
         # Only sqlite returns as strings, so make date objects be strings

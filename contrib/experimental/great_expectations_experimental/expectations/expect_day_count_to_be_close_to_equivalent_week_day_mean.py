@@ -81,7 +81,7 @@ class ColumnCountsPerDaysCustom(ColumnAggregateMetricProvider):
             .order_by(sa.func.Date(column).desc())
             .limit(METRIC_SAMPLE_LIMIT)
         )
-        results = execution_engine.execute_query(query).fetchall()
+        results = execution_engine.execute_query_fetchall(query)
         return results
 
 

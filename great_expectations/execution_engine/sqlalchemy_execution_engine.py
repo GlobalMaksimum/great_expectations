@@ -1130,7 +1130,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     )
 
                 logger.debug(f"Attempting query {sa_query_object!s}")
-                res = self.execute_query(sa_query_object).fetchall()
+                res = self.execute_query_fetchall(sa_query_object)
 
                 logger.debug(
                     f"""SqlAlchemyExecutionEngine computed {len(res[0])} metrics on domain_id \
@@ -1219,7 +1219,7 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             pattern = re.compile(r"(CAST\(EXTRACT\(.*?\))( AS STRING\))", re.IGNORECASE)
             split_query = re.sub(pattern, r"\1 AS VARCHAR)", split_query)
 
-        return self.execute_query(split_query).fetchall()
+        return self.execute_query_fetchall(split_query)
 
     def get_data_for_batch_identifiers(
         self,
@@ -1450,6 +1450,84 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
         return result
 
     @public_api
+    @new_method_or_class(version="0.18.12-vertica")
+    def execute_query_mappings_fetchall(
+        self, query: sqlalchemy.Selectable
+    ) -> list[sa.RowMapping]:
+        """Execute a query using the underlying database engine, get mappings and fetch all results.
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            List of row mappings.
+        """
+        with self.get_connection() as connection:
+            result = connection.execute(query).mappings().fetchall()
+
+        return result
+
+
+    @public_api
+    @new_method_or_class(version="0.18.12-vertica")
+    def execute_query_fetchall(
+        self, query: sqlalchemy.Selectable
+    ) -> List[sqlalchemy.Row]:
+        """Execute a query using the underlying database engine and fetch all results.
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            List of row results.
+        """
+        result=None
+        with self.get_connection() as connection:
+            result = connection.execute(query).fetchall()
+
+        return result
+
+
+    @public_api
+    @new_method_or_class(version="0.18.12-vertica")
+    def execute_query_fetchone(
+        self, query: sqlalchemy.Selectable
+    ) -> List[sqlalchemy.Row]:
+        """Execute a query using the underlying database engine and fetch one result.
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            List of row results.
+        """
+        result=None
+        with self.get_connection() as connection:
+            result = connection.execute(query).fetchone()
+
+        return result
+    
+
+    @public_api
+    @new_method_or_class(version="0.18.12-vertica")
+    def execute_query_scalar(
+        self, query: sqlalchemy.Selectable
+    ) -> List[sqlalchemy.Row]:
+        """Execute a query using the underlying database engine and fetch a scalar result.
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            List of row results.
+        """
+        result=None
+        with self.get_connection() as connection:
+            result = connection.execute(query).scalar()
+
+        return result
+
+    @public_api
     @new_method_or_class(version="0.16.14")
     def execute_query_in_transaction(
         self, query: sqlalchemy.Selectable
@@ -1475,4 +1553,88 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                 with connection.begin():
                     result = connection.execute(query)
 
+        return result
+
+    @public_api
+    @new_method_or_class(version="0.18.12-vertica")
+    def execute_query_in_transaction_fetchone(
+        self, query: sqlalchemy.Selectable
+    ) -> List[sqlalchemy.Row]:
+        """Execute a query using the underlying database engine within a transaction that will auto commit and fetch one result.
+
+        Begin once: https://docs.sqlalchemy.org/en/20/core/connections.html#begin-once
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            List of row results.
+        """
+        with self.get_connection() as connection:
+            if (
+                is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+                and not connection.closed
+            ):
+                result = connection.execute(query).fetchone()
+                connection.commit()
+            else:
+                with connection.begin():
+                    result = connection.execute(query).fetchone()
+
+        return result
+
+    @public_api
+    @new_method_or_class(version="0.18.12-vertica")
+    def execute_query_in_transaction_scalar(
+        self, query: sqlalchemy.Selectable
+    ) -> List[sqlalchemy.Row]:
+        """Execute a query using the underlying database engine within a transaction that will auto commit and fetch a scalar result.
+
+        Begin once: https://docs.sqlalchemy.org/en/20/core/connections.html#begin-once
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            List of row results.
+        """
+        with self.get_connection() as connection:
+            if (
+                is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+                and not connection.closed
+            ):
+                result = connection.execute(query).scalar()
+                connection.commit()
+            else:
+                with connection.begin():
+                    result = connection.execute(query).scalar()
+
+        return result
+
+
+    @public_api
+    @new_method_or_class(version="0.18.12-vertica")
+    def execute_query_in_transaction_fetchall(
+        self, query: sqlalchemy.Selectable
+    ) -> List[sqlalchemy.Row]:
+        """Execute a query using the underlying database engine within a transaction that will auto commit and fetch all results.
+
+        Begin once: https://docs.sqlalchemy.org/en/20/core/connections.html#begin-once
+
+        Args:
+            query: Sqlalchemy selectable query.
+
+        Returns:
+            List of row results.
+        """
+        with self.get_connection() as connection:
+            if (
+                is_version_greater_or_equal(sqlalchemy.sqlalchemy.__version__, "2.0.0")
+                and not connection.closed
+            ):
+                result = connection.execute(query).fetchall()
+                connection.commit()
+            else:
+                with connection.begin():
+                    result = connection.execute(query).fetchall()
         return result

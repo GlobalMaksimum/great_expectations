@@ -73,7 +73,7 @@ class ColumnCustomMax(ColumnAggregateMetricProvider):
         # </snippet>
         # <snippet name="tests/integration/docusaurus/expectations/creating_custom_expectations/expect_column_max_to_be_between_custom.py sql_query">
         query = sa.select(sa.func.max(column)).select_from(selectable)
-        result = execution_engine.execute_query(query).fetchone()
+        result = execution_engine.execute_query_fetchone(query)
 
         return result[0]
 

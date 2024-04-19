@@ -58,16 +58,14 @@ class ColumnMedian(ColumnAggregateMetricProvider):
         if not nonnull_count:
             return None
 
-        element_values = execution_engine.execute_query(
+        column_values = list(execution_engine.execute_query_fetchall(
             sa.select(column)
             .order_by(column)
             .where(column != None)  # noqa: E711
             .offset(max(nonnull_count // 2 - 1, 0))
             .limit(2)
             .select_from(selectable)
-        )
-
-        column_values = list(element_values.fetchall())
+        ))
 
         if len(column_values) == 0:
             column_median = None

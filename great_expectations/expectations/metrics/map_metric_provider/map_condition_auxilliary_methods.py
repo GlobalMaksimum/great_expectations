@@ -350,13 +350,13 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             .select_from(count_selectable)
             .alias("UnexpectedCountSubquery")
         )
-        unexpected_count: Union[float, int] = execution_engine.execute_query(
+        unexpected_count: Union[float, int] = execution_engine.execute_query_scalar(
             sa.select(
                 unexpected_count_query.c[
                     f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
                 ],
             )
-        ).scalar()
+        )
         # Unexpected count can be None if the table is empty, in which case the count
         # should default to zero.
         try:
@@ -406,7 +406,7 @@ def _sqlalchemy_map_condition_rows(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
     try:
-        return execution_engine.execute_query(query).fetchall()
+        return execution_engine.execute_query_fetchall(query)
     except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
         raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
@@ -587,9 +587,9 @@ def _sqlalchemy_map_condition_index(
             domain_records_as_selectable
         ).limit(result_format["partial_unexpected_count"])
     )
-    query_result: List[sqlalchemy.Row] = execution_engine.execute_query(
+    query_result: List[sqlalchemy.Row] = execution_engine.execute_query_fetchall(
         final_query
-    ).fetchall()
+    )
 
     exclude_unexpected_values: bool = result_format.get(
         "exclude_unexpected_values", False

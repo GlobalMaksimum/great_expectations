@@ -176,7 +176,7 @@ def _sqlalchemy_column_pair_map_condition_values(
 
     unexpected_list = [
         (val.unexpected_values_A, val.unexpected_values_B)
-        for val in execution_engine.execute_query(query).fetchall()
+        for val in execution_engine.execute_query_fetchall(query)
     ]
     return unexpected_list
 
@@ -204,9 +204,9 @@ def _sqlalchemy_column_pair_map_condition_filtered_row_count(
     domain_kwargs = dict(**compute_domain_kwargs, **accessor_domain_kwargs)
     selectable = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
-    return execution_engine.execute_query(
+    return execution_engine.execute_query_scalar(
         sa.select(sa.func.count()).select_from(selectable)
-    ).scalar()
+    )
 
 
 def _spark_column_pair_map_condition_values(

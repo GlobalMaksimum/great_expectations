@@ -88,9 +88,9 @@ class QueryTemplateValues(QueryMetricProvider):
             query = cls.get_query(query, template_dict, f"({selectable})")
 
         try:
-            result: List[sqlalchemy.Row] = execution_engine.execute_query(
+            result: List[sqlalchemy.Row] = execution_engine.execute_query_fetchall(
                 sa.text(query)
-            ).fetchall()
+            )
         except Exception as e:
             if hasattr(e, "_query_id"):
                 # query_id removed because it duplicates the validation_results

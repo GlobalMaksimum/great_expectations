@@ -155,14 +155,14 @@ def validate_uuid4(uuid_string: str) -> bool:
 def get_sqlite_temp_table_names(execution_engine: SqlAlchemyExecutionEngine):
     statement = sa.text("SELECT name FROM sqlite_temp_master")
 
-    rows = execution_engine.execute_query(statement).fetchall()
+    rows = execution_engine.execute_query_fetchall(statement)
     return {row[0] for row in rows}
 
 
 def get_sqlite_table_names(execution_engine: SqlAlchemyExecutionEngine):
     statement = sa.text("SELECT name FROM sqlite_master")
 
-    rows = execution_engine.execute_query(statement).fetchall()
+    rows = execution_engine.execute_query_fetchall(statement)
 
     return {row[0] for row in rows}
 

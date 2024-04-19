@@ -284,18 +284,16 @@ def test_sqlite_sample_using_limit(sa):
     batch_data: SqlAlchemyBatchData = engine.get_batch_data(batch_spec=batch_spec)
 
     # Right number of rows?
-    num_rows: int = batch_data.execution_engine.execute_query(
+    num_rows: int = batch_data.execution_engine.execute_query_scalar(
         sa.select(sa.func.count()).select_from(batch_data.selectable)
-    ).scalar()
+    )
     assert num_rows == n
 
     # Right rows?
     rows: list[sa.RowMapping] = (
-        batch_data.execution_engine.execute_query(
+        batch_data.execution_engine.execute_query_mappings_fetchall(
             sa.select(sa.text("*")).select_from(batch_data.selectable)
         )
-        .mappings()
-        .fetchall()
     )
 
     row_dates: List[datetime.datetime] = [parse(row["pickup_datetime"]) for row in rows]
@@ -333,24 +331,24 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.execute_query(
+    num_rows = batch_data.execution_engine.execute_query_scalar(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
-    ).scalar()
+    )
     assert num_rows == round(p * test_df_0.shape[0])
 
-    rows_0: List[tuple] = batch_data.execution_engine.execute_query(
+    rows_0: List[tuple] = batch_data.execution_engine.execute_query_fetchall(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
-    ).fetchall()
+    )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.execute_query(
+    num_rows = batch_data.execution_engine.execute_query_scalar(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
-    ).scalar()
+    )
     assert num_rows == round(p * test_df_0.shape[0])
 
-    rows_1: List[tuple] = batch_data.execution_engine.execute_query(
+    rows_1: List[tuple] = batch_data.execution_engine.execute_query_fetchall(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
-    ).fetchall()
+    )
 
     assert len(rows_0) == len(rows_1) == 1
 
@@ -372,24 +370,24 @@ def test_sample_using_random(sqlite_view_engine, test_df):
     )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.execute_query(
+    num_rows = batch_data.execution_engine.execute_query_scalar(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
-    ).scalar()
+    )
     assert num_rows == round(p * test_df_1.shape[0])
 
-    rows_0 = batch_data.execution_engine.execute_query(
+    rows_0 = batch_data.execution_engine.execute_query_fetchall(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
-    ).fetchall()
+    )
 
     batch_data = my_execution_engine.get_batch_data(batch_spec=batch_spec)
-    num_rows = batch_data.execution_engine.execute_query(
+    num_rows = batch_data.execution_engine.execute_query_scalar(
         sqlalchemy.select(sqlalchemy.func.count()).select_from(batch_data.selectable)
-    ).scalar()
+    )
     assert num_rows == round(p * test_df_1.shape[0])
 
-    rows_1 = batch_data.execution_engine.execute_query(
+    rows_1 = batch_data.execution_engine.execute_query_fetchall(
         sqlalchemy.select(sqlalchemy.text("*")).select_from(batch_data.selectable)
-    ).fetchall()
+    )
 
     assert len(rows_0) == len(rows_1)
 

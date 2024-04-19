@@ -52,7 +52,7 @@ class ColumnValuesNotToBeFutureDate(ColumnMapMetricProvider):
     @column_condition_partial(engine=SqlAlchemyExecutionEngine)
     def _sqlalchemy(cls, column, _execution_engine, **kwargs):
         query = sa.select(column).select_from(kwargs["_table"])
-        results = _execution_engine.execute_query(query).fetchall()
+        results = _execution_engine.execute_query_fetchall(query)
         date_strings = [date_tuple[0] for date_tuple in results]
         answer = [is_not_a_future_date(date_str) for date_str in date_strings]
         result = all(answer)

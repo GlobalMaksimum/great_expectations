@@ -192,9 +192,9 @@ class ColumnValuesBetweenCount(MetricProvider):
             else:
                 condition = sa.and_(column >= min_value, column <= max_value)
 
-        return execution_engine.execute_query(
+        return execution_engine.execute_query_scalar(
             sa.select(sa.func.count()).select_from(selectable).where(condition)
-        ).scalar()
+        )
 
     @metric_value(engine=SparkDFExecutionEngine)
     def _spark(  # noqa: PLR0913, PLR0912

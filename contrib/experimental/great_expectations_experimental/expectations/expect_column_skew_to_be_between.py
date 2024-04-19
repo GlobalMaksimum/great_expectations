@@ -108,9 +108,9 @@ def _get_query_result(func, selectable, execution_engine: SqlAlchemyExecutionEng
     simple_query: sqlalchemy.Select = sa.select(func).select_from(selectable)
 
     try:
-        result: sqlalchemy.Row = execution_engine.execute_query(
+        result: sqlalchemy.Row = execution_engine.execute_query_fetchone(
             simple_query
-        ).fetchone()[0]
+        )[0]
         return result
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."

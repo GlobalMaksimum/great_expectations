@@ -122,9 +122,9 @@ print(validator.head(n_rows=10))
 batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 1
 batch_data = batch_list[0].data
-num_rows = batch_data.execution_engine.execute_query(
+num_rows = batch_data.execution_engine.execute_query_fetchone(
     sa.select(sa.func.count()).select_from(batch_data.selectable)
-).one()[0]
+)[0]
 assert num_rows == 10000
 
 # Here is a BatchRequest naming an inferred data_asset partitioned by day.
@@ -192,9 +192,9 @@ batch_list = context.get_batch_list(batch_request=batch_request)
 assert len(batch_list) == 6  # ride occupancy ranges from 1 passenger to 6 passengers
 
 batch_data = batch_list[1].data  # 2-passenger sample of batch data
-num_rows = batch_data.execution_engine.execute_query(
+num_rows = batch_data.execution_engine.execute_query_scalar(
     sa.select(sa.func.count()).select_from(batch_data.selectable)
-).scalar()
+)
 assert num_rows < 200
 # </snippet>
 

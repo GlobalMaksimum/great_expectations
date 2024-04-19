@@ -46,7 +46,7 @@ class ColumnDistinctMonths(ColumnAggregateMetricProvider):
             sa.func.date_format(sa.func.Date(column), MONTH_FORMAT).distinct()
         ).select_from(selectable)
         all_unique_months = [
-            i[0] for i in execution_engine.execute_query(query).fetchall()
+            i[0] for i in execution_engine.execute_query_fetchall(query)
         ]
 
         return all_unique_months

@@ -194,7 +194,7 @@ def _get_column_quantiles_mssql(
     quantiles_query: sqlalchemy.Select = sa.select(*selects).select_from(selectable)
 
     try:
-        quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
+        quantiles_results = execution_engine.execute_query_fetchone(quantiles_query)
         return list(quantiles_results)
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -216,7 +216,7 @@ def _get_column_quantiles_bigquery(
     quantiles_query: sqlalchemy.Select = sa.select(*selects).select_from(selectable)
 
     try:
-        quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
+        quantiles_results = execution_engine.execute_query_fetchone(quantiles_query)
         return list(quantiles_results)
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -271,7 +271,7 @@ def _get_column_quantiles_mysql(
     )
 
     try:
-        quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
+        quantiles_results = execution_engine.execute_query_fetchone(quantiles_query)
         return list(quantiles_results)
     except sqlalchemy.ProgrammingError as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -294,7 +294,7 @@ def _get_column_quantiles_trino(
     )
 
     try:
-        quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
+        quantiles_results = execution_engine.execute_query_fetchone(quantiles_query)
         return list(quantiles_results)[0]
     except (sqlalchemy.ProgrammingError, trino.trinoexceptions.TrinoUserError) as pe:
         exception_message: str = "An SQL syntax Exception occurred."
@@ -356,7 +356,7 @@ def _get_column_quantiles_sqlite(
 
     try:
         quantiles_results = [
-            execution_engine.execute_query(quantile_query).fetchone()
+            execution_engine.execute_query_fetchone(quantile_query)
             for quantile_query in quantile_queries
         ]
         return list(
@@ -386,9 +386,9 @@ def _get_column_quantiles_athena(
         selectable
     )
     try:
-        quantiles_results = execution_engine.execute_query(
+        quantiles_results = execution_engine.execute_query_fetchone(
             quantiles_query_approx
-        ).fetchone()
+        )
         # the ast literal eval is needed because the method is returning a json string and not a dict
         results = ast.literal_eval(quantiles_results[0])
         return results
@@ -420,7 +420,7 @@ def _get_column_quantiles_generic_sqlalchemy(
     quantiles_query: sqlalchemy.Select = sa.select(*selects).select_from(selectable)
 
     try:
-        quantiles_results = execution_engine.execute_query(quantiles_query).fetchone()
+        quantiles_results = execution_engine.execute_query_fetchone(quantiles_query)
         return list(quantiles_results)
     except sqlalchemy.ProgrammingError:
         # ProgrammingError: (psycopg2.errors.SyntaxError) Aggregate function "percentile_disc" is not supported;
@@ -436,9 +436,9 @@ def _get_column_quantiles_generic_sqlalchemy(
             ).select_from(selectable)
             if allow_relative_error or execution_engine.engine.driver == "psycopg2":
                 try:
-                    quantiles_results = execution_engine.execute_query(
+                    quantiles_results = execution_engine.execute_query_fetchone(
                         quantiles_query_approx
-                    ).fetchone()
+                    )
                     return list(quantiles_results)
                 except sqlalchemy.ProgrammingError as pe:
                     exception_message: str = "An SQL syntax Exception occurred."

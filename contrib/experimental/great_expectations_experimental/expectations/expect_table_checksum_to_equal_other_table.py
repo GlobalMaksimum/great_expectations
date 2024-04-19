@@ -107,7 +107,7 @@ class TableChecksum(TableMetricProvider):
         if DEBUG:
             logger.error("\n***********cksumquery***********\n" + cksumquery)
 
-        return int(execution_engine.execute_query(sa.text(cksumquery)).scalar())
+        return int(execution_engine.execute_query_scalar(sa.text(cksumquery)))
 
     # @metric_value(engine=SparkDFExecutionEngine)
     # def _spark(

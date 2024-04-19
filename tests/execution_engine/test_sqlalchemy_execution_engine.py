@@ -461,19 +461,19 @@ def test_get_domain_records_with_column_domain(sa):
             "condition_parser": "great_expectations__experimental__",
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         get_sqlalchemy_domain_data(data)
-    ).fetchall()
+    )
 
     expected_column_df = df.iloc[:3]
     execution_engine = build_sa_execution_engine(expected_column_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -499,19 +499,19 @@ def test_get_domain_records_with_column_domain_and_filter_conditions(sa):
             ],
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fatchall(
         get_sqlalchemy_domain_data(data)
-    ).fetchall()
+    )
 
     expected_column_df = df.iloc[:3]
     execution_engine = build_sa_execution_engine(expected_column_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -537,19 +537,19 @@ def test_get_domain_records_with_different_column_domain_and_filter_conditions(s
             ],
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         get_sqlalchemy_domain_data(data)
-    ).fetchall()
+    )
 
     expected_column_df = df.iloc[:1]
     execution_engine = build_sa_execution_engine(expected_column_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -603,21 +603,21 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "ignore_row_if": "both_values_are_missing",
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     expected_column_pair_df = pd.DataFrame(
         {"a": [2, 3, 4, 6], "b": [3.0, 4.0, 5.0, 6.0], "c": [2.0, 3.0, 4.0, None]}
     )
     execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -633,21 +633,21 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "ignore_row_if": "either_value_is_missing",
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     expected_column_pair_df = pd.DataFrame(
         {"a": [2, 3, 4], "b": [3, 4, 5], "c": [2, 3, 4]}
     )
     execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -663,9 +663,9 @@ def test_get_domain_records_with_column_pair_domain(sa):
             "ignore_row_if": "neither",
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         get_sqlalchemy_domain_data(data)
-    ).fetchall()
+    )
 
     expected_column_pair_df = pd.DataFrame(
         {
@@ -675,13 +675,13 @@ def test_get_domain_records_with_column_pair_domain(sa):
         }
     )
     execution_engine = build_sa_execution_engine(expected_column_pair_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -706,21 +706,21 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "ignore_row_if": "all_values_are_missing",
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     expected_multicolumn_df = pd.DataFrame(
         {"a": [2, 3, 4, 5], "b": [3, 4, 5, 7], "c": [2, 3, 4, 6]}, index=[0, 1, 2, 4]
     )
     execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -742,21 +742,21 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "ignore_row_if": "any_value_is_missing",
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     expected_multicolumn_df = pd.DataFrame(
         {"a": [1, 2, 3, 4], "b": [2, 3, 4, 5], "c": [1, 2, 3, 4]}, index=[0, 1, 2, 3]
     )
     execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -776,9 +776,9 @@ def test_get_domain_records_with_multicolumn_domain(sa):
             "ignore_row_if": "never",
         }
     )
-    domain_data = execution_engine.execute_query(
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     expected_multicolumn_df = pd.DataFrame(
         {
@@ -789,13 +789,13 @@ def test_get_domain_records_with_multicolumn_domain(sa):
         index=[0, 1, 2, 3, 4, 5],
     )
     execution_engine = build_sa_execution_engine(expected_multicolumn_df, sa)
-    expected_data = execution_engine.execute_query(
+    expected_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
+    )
 
     assert (
         domain_data == expected_data
@@ -814,16 +814,16 @@ def test_get_compute_domain_with_no_domain_kwargs(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = execution_engine.execute_query(
+    raw_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
-    domain_data = execution_engine.execute_query(
+    )
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -844,16 +844,16 @@ def test_get_compute_domain_with_column_pair(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = execution_engine.execute_query(
+    raw_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
-    domain_data = execution_engine.execute_query(
+    )
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -881,16 +881,16 @@ def test_get_compute_domain_with_multicolumn(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = execution_engine.execute_query(
+    raw_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
-    domain_data = execution_engine.execute_query(
+    )
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     # Ensuring that with no domain nothing happens to the data itself
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -913,16 +913,16 @@ def test_get_compute_domain_with_column_domain(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = execution_engine.execute_query(
+    raw_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(
             cast(
                 SqlAlchemyBatchData, execution_engine.batch_manager.active_batch_data
             ).selectable
         )
-    ).fetchall()
-    domain_data = execution_engine.execute_query(
+    )
+    domain_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*")).select_from(data)
-    ).fetchall()
+    )
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -947,7 +947,7 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = execution_engine.execute_query(
+    raw_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*"))
         .select_from(
             cast(
@@ -955,10 +955,10 @@ def test_get_compute_domain_with_unmeetable_row_condition(sa):
             ).selectable
         )
         .where(sa.column("b") > 24)
-    ).fetchall()
-    domain_data = execution_engine.execute_query(
+    )
+    domain_data = execution_engine.execute_query_fetchall(
         get_sqlalchemy_domain_data(data)
-    ).fetchall()
+    )
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -987,7 +987,7 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
     )
 
     # Seeing if raw data is the same as the data after condition has been applied - checking post computation data
-    raw_data = execution_engine.execute_query(
+    raw_data = execution_engine.execute_query_fetchall(
         sa.select(sa.text("*"))
         .select_from(
             cast(
@@ -995,10 +995,10 @@ def test_get_compute_domain_with_ge_experimental_condition_parser(sa):
             ).selectable
         )
         .where(sa.column("b") == 2)
-    ).fetchall()
-    domain_data = execution_engine.execute_query(
+    )
+    domain_data = execution_engine.execute_query_fetchall(
         get_sqlalchemy_domain_data(data)
-    ).fetchall()
+    )
 
     # Ensuring that column domain is now an accessor kwarg, and data remains unmodified
     assert raw_data == domain_data, "Data does not match after getting compute domain"
@@ -1245,7 +1245,7 @@ class TestExecuteQuery:
         )
 
         select_all = f"SELECT * FROM {sa.text('test')};"
-        result = execution_engine.execute_query(sa.text(select_all)).fetchall()
+        result = execution_engine.execute_query_fetchall(sa.text(select_all))
 
         expected = [(1, 4), (2, 4)]
         assert [r for r in result] == expected
@@ -1256,9 +1256,9 @@ class TestExecuteQuery:
         )
 
         select_all = f"SELECT * FROM {sa.text('test')};"
-        result = execution_engine.execute_query_in_transaction(
+        result = execution_engine.execute_query_in_transaction_fetchall(
             sa.text(select_all)
-        ).fetchall()
+        )
 
         expected = [(1, 4), (2, 4)]
         assert [r for r in result] == expected
@@ -1296,8 +1296,8 @@ class TestConnectionPersistence:
 
         select_temp_table = "SELECT * FROM temp_table;"
 
-        res = execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
-        res2 = execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        res = execution_engine.execute_query_fetchall(sa.text(select_temp_table))
+        res2 = execution_engine.execute_query_fetchall(sa.text(select_temp_table))
 
         # This assert is here just to make sure when we assert res == res2 we are not comparing None == None
         expected = [(1, 4), (2, 4)]
@@ -1331,11 +1331,11 @@ class TestConnectionPersistence:
 
         select_temp_table = "SELECT * FROM temp_table;"
 
-        execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        execution_engine.execute_query_fetchall(sa.text(select_temp_table))
         with execution_engine.get_connection() as test_con:
             assert connection == test_con
 
-        execution_engine.execute_query(sa.text(select_temp_table)).fetchall()
+        execution_engine.execute_query_fetchall(sa.text(select_temp_table))
         with execution_engine.get_connection() as test_con:
             assert connection == test_con
 

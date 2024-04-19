@@ -166,7 +166,7 @@ def _sqlalchemy_multicolumn_map_condition_values(
     if result_format["result_format"] != "COMPLETE":
         query = query.limit(result_format["partial_unexpected_count"])
 
-    return [val._asdict() for val in execution_engine.execute_query(query).fetchall()]
+    return [val._asdict() for val in execution_engine.execute_query_fetchall(query)]
 
 
 def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
@@ -201,9 +201,9 @@ def _sqlalchemy_multicolumn_map_condition_filtered_row_count(
 
     selectable = get_sqlalchemy_selectable(selectable)
 
-    return execution_engine.execute_query(
+    return execution_engine.execute_query_scalar(
         sa.select(sa.func.count()).select_from(selectable)
-    ).scalar()
+    )
 
 
 def _spark_multicolumn_map_condition_values(

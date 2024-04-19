@@ -154,3 +154,5 @@ Pipfile.lock
 tests/integration/cloud/rest_contracts/pacts
 
 .databricks
+
+sample

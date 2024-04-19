@@ -60,9 +60,9 @@ class QueryColumn(QueryMetricProvider):
         else:
             query = query.format(col=column, active_batch=f"({selectable})")  # type: ignore[union-attr] # could be none
 
-        result: List[sqlalchemy.Row] = execution_engine.execute_query(
+        result: List[sqlalchemy.Row] = execution_engine.execute_query_fetchall(
             sa.text(query)
-        ).fetchall()
+        )
 
         return [element._asdict() for element in result]
 

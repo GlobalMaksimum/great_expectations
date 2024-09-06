@@ -1,1 +1,1 @@
-sqlalchemy-vertica-python==0.6.3
+vertica-sqlalchemy-dialect==0.0.8.2

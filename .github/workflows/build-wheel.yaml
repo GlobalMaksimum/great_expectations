@@ -1,0 +1,28 @@
+name: Build Wheel
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  great-expectations-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10.9"
+      - name: install dependencies
+        run: pip install -r requirements.txt && pip install -r requirements-vertica.txt  && pip install wheel
+      - name: Build python library
+        run: python setup.py bdist_wheel
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            dist/great_expectations-*.whl
+            requirements.txt
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -93,7 +93,9 @@ def _pandas_map_condition_index(
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
 
         ###
         # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -104,7 +106,9 @@ def _pandas_map_condition_index(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
         if filter_column_isnull:
-            domain_records_df = domain_records_df[domain_records_df[column_name].notnull()]
+            domain_records_df = domain_records_df[
+                domain_records_df[column_name].notnull()
+            ]
 
         domain_column_name_list.append(column_name)
 
@@ -182,13 +186,17 @@ def _pandas_map_condition_query(
     )
 
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
 
         filter_column_isnull = kwargs.get(
             "filter_column_isnull", getattr(cls, "filter_column_isnull", False)
         )
         if filter_column_isnull:
-            domain_records_df = domain_records_df[domain_records_df[column_name].notnull()]
+            domain_records_df = domain_records_df[
+                domain_records_df[column_name].notnull()
+            ]
 
     domain_values_df_filtered = domain_records_df[boolean_mapped_unexpected_values]
     index_list = domain_values_df_filtered.index.to_list()
@@ -223,7 +231,9 @@ def _pandas_map_condition_rows(
     df = execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
 
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
 
         ###
         # NOTE: 20201111 - JPC - in the map_series / map_condition_series world (pandas), we
@@ -303,7 +313,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
         else_=sa.sql.expression.cast(0, sa.Numeric),
     ).label("condition")
 
-    count_selectable: sqlalchemy.Select = sa.select(count_case_statement)
+    count_selectable: sqlalchemy.Select = sa.select(
+        count_case_statement, sa.func.count(sa.literal(1)).label("count")
+    )
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         selectable = get_sqlalchemy_selectable(selectable)
         count_selectable = count_selectable.select_from(selectable)
@@ -335,13 +347,18 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             count_selectable = temp_table_obj
 
         if execution_engine.dialect_name == GXSqlDialect.VERTICA:
-            count_selectable = get_sqlalchemy_selectable(count_selectable.group_by(sa.column(metric_domain_kwargs["column"])))
+            count_selectable = get_sqlalchemy_selectable(
+                count_selectable.group_by(sa.column(metric_domain_kwargs["column"]))
+            )
             unexpected_count_query: sqlalchemy.Select = (
                 sa.select(
-                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
-                ).select_from(count_selectable).alias("UnexpectedCountSubquery"))
-            
-            
+                    sa.func.sum(sa.column("condition") * sa.column("count")).label(
+                        "unexpected_count"
+                    ),
+                )
+                .select_from(count_selectable)
+                .alias("UnexpectedCountSubquery")
+            )
             unexpected_count: Union[float, int] = execution_engine.execute_query_scalar(
                 sa.select(
                     unexpected_count_query.c[
@@ -358,7 +375,7 @@ def _sqlalchemy_map_condition_unexpected_count_value(
                 .select_from(count_selectable)
                 .alias("UnexpectedCountSubquery")
             )
-            
+
             unexpected_count: Union[float, int] = execution_engine.execute_query_scalar(
                 sa.select(
                     unexpected_count_query.c[
@@ -375,7 +392,9 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
     except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
-        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(message=exception_message)
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=exception_message
+        )
 
     return convert_to_json_serializable(unexpected_count)
 
@@ -416,7 +435,9 @@ def _sqlalchemy_map_condition_rows(
         return execution_engine.execute_query(query).fetchall()
     except sqlalchemy.OperationalError as oe:
         exception_message: str = f"An SQL execution Exception occurred: {oe!s}."
-        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(message=exception_message)
+        raise gx_exceptions.InvalidMetricAccessorDomainKwargsKeyError(
+            message=exception_message
+        )
 
 
 def _sqlalchemy_map_condition_query(  # noqa: C901 - too complex
@@ -451,7 +472,9 @@ def _sqlalchemy_map_condition_query(  # noqa: C901 - too complex
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
         domain_column_name_list.append(column_name)
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
@@ -485,13 +508,15 @@ def _sqlalchemy_map_condition_query(  # noqa: C901 - too complex
     for column_name in domain_column_name_list:
         column_selector.append(sa.column(column_name))
 
-    unexpected_condition_query_with_selected_columns: sa.select = sa.select(*column_selector).where(
-        unexpected_condition
+    unexpected_condition_query_with_selected_columns: sa.select = sa.select(
+        *column_selector
+    ).where(unexpected_condition)
+    source_table_and_schema: sa.Table = get_sqlalchemy_source_table_and_schema(
+        execution_engine
     )
-    source_table_and_schema: sa.Table = get_sqlalchemy_source_table_and_schema(execution_engine)
 
-    source_table_and_schema_as_selectable: Union[sa.Table, sa.Select] = get_sqlalchemy_selectable(
-        source_table_and_schema
+    source_table_and_schema_as_selectable: Union[sa.Table, sa.Select] = (
+        get_sqlalchemy_selectable(source_table_and_schema)
     )
     final_select_statement: sa.select = (
         unexpected_condition_query_with_selected_columns.select_from(
@@ -533,7 +558,9 @@ def _sqlalchemy_map_condition_index(  # noqa: C901 - too complex
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
         domain_column_name_list.append(column_name)
     # multi-column map expectations
     elif "column_list" in accessor_domain_kwargs:
@@ -568,23 +595,31 @@ def _sqlalchemy_map_condition_index(  # noqa: C901 - too complex
     for column_name in domain_column_name_list:
         column_selector.append(sa.column(column_name))
 
-    domain_records_as_selectable: sa.sql.Selectable = execution_engine.get_domain_records(
-        domain_kwargs=domain_kwargs
+    domain_records_as_selectable: sa.sql.Selectable = (
+        execution_engine.get_domain_records(domain_kwargs=domain_kwargs)
     )
-    unexpected_condition_query_with_selected_columns: sa.select = sa.select(*column_selector).where(
-        unexpected_condition
-    )
+    unexpected_condition_query_with_selected_columns: sa.select = sa.select(
+        *column_selector
+    ).where(unexpected_condition)
 
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
-        domain_records_as_selectable = get_sqlalchemy_selectable(domain_records_as_selectable)
+        domain_records_as_selectable = get_sqlalchemy_selectable(
+            domain_records_as_selectable
+        )
 
     # since SQL tables can be **very** large, truncate query_result values at 20, or at `partial_unexpected_count`  # noqa: E501
-    final_query: sa.select = unexpected_condition_query_with_selected_columns.select_from(
-        domain_records_as_selectable
-    ).limit(result_format["partial_unexpected_count"])
-    query_result: List[sqlalchemy.Row] = execution_engine.execute_query(final_query).fetchall()
+    final_query: sa.select = (
+        unexpected_condition_query_with_selected_columns.select_from(
+            domain_records_as_selectable
+        ).limit(result_format["partial_unexpected_count"])
+    )
+    query_result: List[sqlalchemy.Row] = execution_engine.execute_query(
+        final_query
+    ).fetchall()
 
-    exclude_unexpected_values: bool = result_format.get("exclude_unexpected_values", False)
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
 
     return _get_sqlalchemy_customized_unexpected_index_list(
         exclude_unexpected_values=exclude_unexpected_values,
@@ -703,7 +738,9 @@ def _spark_map_condition_index(  # noqa: C901 - too complex
     domain_column_name_list: List[str] = list()
     # column map expectations
     if "column" in accessor_domain_kwargs:
-        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
+        column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs[
+            "column"
+        ]
         domain_column_name_list.append(column_name)
 
     # multi-column map expectations
@@ -734,9 +771,13 @@ def _spark_map_condition_index(  # noqa: C901 - too complex
     filtered = data.filter(F.col("__unexpected") == True).drop(  # noqa: E712
         F.col("__unexpected")
     )
-    exclude_unexpected_values: bool = result_format.get("exclude_unexpected_values", False)
+    exclude_unexpected_values: bool = result_format.get(
+        "exclude_unexpected_values", False
+    )
 
-    unexpected_index_column_names: List[str] = result_format["unexpected_index_column_names"]
+    unexpected_index_column_names: List[str] = result_format[
+        "unexpected_index_column_names"
+    ]
     columns_to_keep: List[str] = [column for column in unexpected_index_column_names]
     columns_to_keep += domain_column_name_list
 
@@ -810,7 +851,9 @@ def _generate_temp_table(
     metrics: Dict[str, Any],
     **kwargs,
 ) -> sa.Table:
-    temp_table_name: str = generate_temporary_table_name(default_table_name_prefix="#ge_temp_")
+    temp_table_name: str = generate_temporary_table_name(
+        default_table_name_prefix="#ge_temp_"
+    )
     metadata: sa.MetaData = sa.MetaData()
     metadata.reflect(bind=connection)
     temp_table_obj: sa.Table = sa.Table(
@@ -840,7 +883,9 @@ def _get_sqlalchemy_customized_unexpected_index_list(
         }
         for row in query_result:
             for index in range(len(unexpected_index_column_names)):
-                primary_key_dict_list[unexpected_index_column_names[index]].append(row[index])
+                primary_key_dict_list[unexpected_index_column_names[index]].append(
+                    row[index]
+                )
         unexpected_index_list.append(primary_key_dict_list)
 
     else:

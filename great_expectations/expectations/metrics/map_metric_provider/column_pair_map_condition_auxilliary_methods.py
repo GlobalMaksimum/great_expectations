@@ -93,7 +93,6 @@ def _pandas_column_pair_map_condition_values(
     ]
     if result_format["result_format"] == "COMPLETE":
         return unexpected_list
-
     return unexpected_list[: result_format["partial_unexpected_count"]]
 
 
@@ -176,7 +175,7 @@ def _sqlalchemy_column_pair_map_condition_values(
 
     unexpected_list = [
         (val.unexpected_values_A, val.unexpected_values_B)
-        for val in execution_engine.execute_query(query).fetchall()
+        for val in execution_engine.execute_query_fetchall(query)
     ]
     return unexpected_list
 

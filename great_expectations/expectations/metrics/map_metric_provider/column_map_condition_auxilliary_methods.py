@@ -262,8 +262,12 @@ def _sqlalchemy_column_map_condition_values(
     column_name: Union[str, sqlalchemy.quoted_name] = accessor_domain_kwargs["column"]
 
     selectable = execution_engine.get_domain_records(domain_kwargs=compute_domain_kwargs)
-
-    query = sa.select(sa.column(column_name).label("unexpected_values")).where(unexpected_condition)
+    print("safadsfsafafasfeqwfwef")
+    import vertica_sqlalchemy_dialect as vsa
+    if isinstance(execution_engine.dialect,vsa.base.VerticaDialect):
+        query= sa.select(sa.column(column_name).label("unexpected_values")).group_by(sa.column(column_name)).having(unexpected_condition)
+    else:
+        query = sa.select(sa.column(column_name).label("unexpected_values")).where(unexpected_condition)
     if not _is_sqlalchemy_metric_selectable(map_metric_provider=cls):
         if hasattr(selectable, "subquery"):
             query = query.select_from(selectable.subquery())

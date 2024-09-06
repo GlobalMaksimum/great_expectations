@@ -75,6 +75,8 @@ class ColumnValuesUnique(ColumnMapMetricProvider):
                 .group_by(column)
                 .having(sa.func.count(column) > 1)
             )
+        if dialect_name=="vertica":
+            return sa.func.count(column) == sa.func.count(sa.func.distinct(column))
         return column.notin_(dup_query)
 
     @column_condition_partial(

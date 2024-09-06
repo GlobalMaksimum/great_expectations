@@ -285,6 +285,8 @@ def _sqlalchemy_map_condition_unexpected_count_value(
     unexpected_condition, compute_domain_kwargs, accessor_domain_kwargs = metrics[
         "unexpected_condition"
     ]
+
+    # passenger_count is not null AND count(passenger_count)!=count(distinct passenger_count)
     """
     In order to invoke the "ignore_row_if" filtering logic, "execution_engine.get_domain_records()" must be supplied
     with all of the available "domain_kwargs" keys.
@@ -332,21 +334,38 @@ def _sqlalchemy_map_condition_unexpected_count_value(
 
             count_selectable = temp_table_obj
 
-        count_selectable = get_sqlalchemy_selectable(count_selectable)
-        unexpected_count_query: sqlalchemy.Select = (
-            sa.select(
-                sa.func.sum(sa.column("condition")).label("unexpected_count"),
+        if execution_engine.dialect_name == GXSqlDialect.VERTICA:
+            count_selectable = get_sqlalchemy_selectable(count_selectable.group_by(sa.column(metric_domain_kwargs["column"])))
+            unexpected_count_query: sqlalchemy.Select = (
+                sa.select(
+                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
+                ).select_from(count_selectable).alias("UnexpectedCountSubquery"))
+            
+            
+            unexpected_count: Union[float, int] = execution_engine.execute_query_scalar(
+                sa.select(
+                    unexpected_count_query.c[
+                        f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                    ],
+                )
             )
-            .select_from(count_selectable)
-            .alias("UnexpectedCountSubquery")
-        )
-        unexpected_count: Union[float, int] = execution_engine.execute_query(
-            sa.select(
-                unexpected_count_query.c[
-                    f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
-                ],
+        else:
+            count_selectable = get_sqlalchemy_selectable(count_selectable)
+            unexpected_count_query: sqlalchemy.Select = (
+                sa.select(
+                    sa.func.sum(sa.column("condition")).label("unexpected_count"),
+                )
+                .select_from(count_selectable)
+                .alias("UnexpectedCountSubquery")
             )
-        ).scalar()
+            
+            unexpected_count: Union[float, int] = execution_engine.execute_query_scalar(
+                sa.select(
+                    unexpected_count_query.c[
+                        f"{SummarizationMetricNameSuffixes.UNEXPECTED_COUNT.value}"
+                    ],
+                )
+            )
         # Unexpected count can be None if the table is empty, in which case the count
         # should default to zero.
         try:

@@ -117,17 +117,6 @@ try:
 except ImportError:
     sqlalchemy_dremio = None
 
-
-try:
-    import vertica_sqlalchemy_dialect
-
-    if sa:
-        sa.dialects.registry.register(
-            GXSqlDialect.VERTICA, "vertica_sqlalchemy_dialect.base", "VerticaDialect"
-        )
-except ImportError:
-    vertica_sqlalchemy_dialect = None
-
 if snowflake.snowflakedialect:
     if sa:
         # Sometimes "snowflake-sqlalchemy" fails to self-register in certain environments, so we do it explicitly.  # noqa: E501
@@ -189,6 +178,7 @@ def _get_dialect_type_module(dialect):  # noqa: C901
             return bigquery_types_tuple
     except (TypeError, AttributeError):
         pass
+
     # Teradata types module
     try:
         if (
@@ -403,11 +393,6 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
             # WARNING: ClickHouse Support is experimental, functionality is not fully under test
             self.dialect_module = import_library_module(
                 module_name="clickhouse_sqlalchemy.drivers.base"
-            )
-        elif self.dialect_name == GXSqlDialect.VERTICA:
-            # WARNING: Vertica Support is experimental, functionality is not fully under test
-            self.dialect_module = import_library_module(
-                module_name="vertica_sqlalchemy_dialect.base"
             )
         else:
             self.dialect_module = None

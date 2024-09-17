@@ -347,18 +347,38 @@ def _sqlalchemy_map_condition_unexpected_count_value(
             count_selectable = temp_table_obj
 
         if execution_engine.dialect_name == GXSqlDialect.VERTICA:
-            count_selectable = get_sqlalchemy_selectable(
-                count_selectable.group_by(sa.column(metric_domain_kwargs["column"]))
-            )
-            unexpected_count_query: sqlalchemy.Select = (
-                sa.select(
-                    sa.func.sum(sa.column("condition") * sa.column("count")).label(
-                        "unexpected_count"
-                    ),
+            if "column" in metric_domain_kwargs:
+                count_selectable = get_sqlalchemy_selectable(
+                    count_selectable.group_by(sa.column(metric_domain_kwargs["column"]))
                 )
-                .select_from(count_selectable)
-                .alias("UnexpectedCountSubquery")
-            )
+                unexpected_count_query: sqlalchemy.Select = (
+                    sa.select(
+                        sa.func.sum(sa.column("condition") * sa.column("count")).label(
+                            "unexpected_count"
+                        ),
+                    )
+                    .select_from(count_selectable)
+                    .alias("UnexpectedCountSubquery")
+                )
+            elif "column_list" in metric_domain_kwargs:
+                count_selectable = get_sqlalchemy_selectable(
+                    count_selectable.group_by(
+                        *[
+                            sa.column(column)
+                            for column in metric_domain_kwargs["column_list"]
+                        ],
+                        sa.column("_num_rows"),
+                    )
+                )
+                unexpected_count_query: sqlalchemy.Select = (
+                    sa.select(
+                        sa.func.sum(sa.column("condition") * sa.column("count")).label(
+                            "unexpected_count"
+                        ),
+                    )
+                    .select_from(count_selectable)
+                    .alias("UnexpectedCountSubquery")
+                )
             unexpected_count: Union[float, int] = execution_engine.execute_query_scalar(
                 sa.select(
                     unexpected_count_query.c[

@@ -662,6 +662,11 @@ class SqlAlchemyExecutionEngine(ExecutionEngine):
                     domain_kwargs["table"],
                     sa.MetaData(),
                     schema=data_object._schema_name,
+                    quote=(
+                        False
+                        if self.engine.dialect.name.lower() == GXSqlDialect.VERTICA
+                        else None
+                    ),
                 )
             else:
                 selectable = data_object.selectable

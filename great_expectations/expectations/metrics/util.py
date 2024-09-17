@@ -912,6 +912,9 @@ def get_dialect_like_pattern_expression(  # noqa: C901, PLR0912
         TypeError,
     ):  # TypeError can occur if the driver was not installed and so is None
         pass
+    # vertica
+    if isinstance(dialect, vsa.base.VerticaDialect):
+        dialect_supported = True
 
     if hasattr(dialect, "dialect"):
         if issubclass(
